@@ -1,0 +1,92 @@
+<% layout('layouts/admin') %>
+
+<h1 class="text-xl font-semibold mb-3">All Sites</h1>
+
+<div class="glass-card rounded-xl overflow-hidden">
+  <% if (!sites.length) { %>
+    <div class="p-4 text-xs text-slate-300">
+      Belum ada site terdaftar.
+    </div>
+  <% } else { %>
+    <table class="min-w-full text-xs">
+      <thead class="bg-slate-900/90 border-b border-slate-800">
+        <tr>
+          <th class="px-3 py-2 text-left">Domain</th>
+          <th class="px-3 py-2 text-left">User</th>
+          <th class="px-3 py-2 text-left">Template</th>
+          <th class="px-3 py-2 text-left">Status</th>
+          <th class="px-3 py-2 text-left">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% sites.forEach(s => { %>
+          <tr class="border-t border-slate-800/70 hover:bg-slate-900/60">
+            <td class="px-3 py-2">
+              <a href="http://<%= s.domain %>/" target="_blank"
+                 class="text-sky-300 hover:text-sky-200">
+                <%= s.domain %>
+              </a>
+            </td>
+            <td class="px-3 py-2">
+              <%= s.User ? s.User.email : '-' %>
+            </td>
+            <td class="px-3 py-2"><%= s.template %></td>
+            <td class="px-3 py-2">
+              <span class="px-2 py-0.5 rounded-full text-[10px]
+                    <%= s.status === 'active' ? 'bg-emerald-900/40 text-emerald-300' :
+                        s.status === 'pending_dns' ? 'bg-amber-900/40 text-amber-300' :
+                        'bg-slate-800 text-slate-300' %>">
+                <%= s.status.toUpperCase() %>
+              </span>
+            </td>
+            <td class="px-3 py-2">
+              <div class="flex flex-wrap gap-1">
+                <select class="text-[11px] bg-slate-900 border border-slate-700 rounded px-2 py-1 js-status"
+                        data-id="<%= s.id %>">
+                  <option value="pending_dns" <%= s.status === 'pending_dns' ? 'selected' : '' %>>pending_dns</option>
+                  <option value="active" <%= s.status === 'active' ? 'selected' : '' %>>active</option>
+                  <option value="disabled" <%= s.status === 'disabled' ? 'selected' : '' %>>disabled</option>
+                </select>
+
+                <select class="text-[11px] bg-slate-900 border border-slate-700 rounded px-2 py-1 js-template"
+                        data-id="<%= s.id %>">
+                  <option value="stream_classic" <%= s.template === 'stream_classic' ? 'selected' : '' %>>
+                    stream_classic
+                  </option>
+                  <option value="cinema_hero" <%= s.template === 'cinema_hero' ? 'selected' : '' %>>
+                    cinema_hero
+                  </option>
+                  <option value="blog_magazine" <%= s.template === 'blog_magazine' ? 'selected' : '' %>>
+                    blog_magazine
+                  </option>
+                </select>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<script>
+  $(function() {
+    $(".js-status").on("change", function() {
+      const id = $(this).data("id");
+      const status = $(this).val();
+      $.post("/admin/sites/" + id + "/status", { status }, function(res) {
+        if (res.success) showToast("success", res.message);
+        else showToast("error", res.message || "Failed");
+      }).fail(() => showToast("error", "Server error"));
+    });
+
+    $(".js-template").on("change", function() {
+      const id = $(this).data("id");
+      const template = $(this).val();
+      $.post("/admin/sites/" + id + "/template", { template }, function(res) {
+        if (res.success) showToast("success", res.message);
+        else showToast("error", res.message || "Failed");
+      }).fail(() => showToast("error", "Server error"));
+    });
+  });
+</script>
