@@ -1,0 +1,60 @@
+<% layout('layouts/admin') %>
+
+<h1 class="text-xl font-semibold mb-4">QRIS Settings</h1>
+
+<div class="glass-card rounded-xl p-4 mb-4">
+  <form id="formQris" class="space-y-3">
+    <div>
+      <label class="block text-[11px] mb-1">QRIS FULL Payload (dari penyedia)</label>
+      <textarea
+        name="qrisPayload"
+        rows="5"
+        class="input-textarea"
+        placeholder="Contoh: 00020101021126...6304XXXX"><%= qrisRaw || '' %></textarea>
+      <p class="text-[10px] text-slate-400 mt-1">
+        Tempel payload QRIS <span class="font-semibold">lengkap</span> yang kamu dapat dari bank/gateway.
+        Sistem akan otomatis menghapus tag amount (54) dan CRC (63), lalu menyimpannya sebagai base
+        untuk generate QR dinamis (nominal unik) di sisi user.
+      </p>
+    </div>
+
+    <button type="submit"
+      class="px-4 py-2 text-xs rounded bg-indigo-500 hover:bg-indigo-600">
+      Save
+    </button>
+  </form>
+</div>
+
+<div class="glass-card rounded-xl p-4">
+  <h2 class="text-sm font-semibold mb-2">Base Payload (hasil normalisasi, tanpa 54 & 63)</h2>
+
+  <% if (qrisBase) { %>
+    <code class="block text-[11px] break-all bg-slate-900 px-3 py-2 rounded border border-slate-700">
+      <%= qrisBase %>
+    </code>
+    <p class="mt-2 text-[10px] text-slate-400">
+      Ini adalah payload dasar yang digunakan saat user memilih paket billing. Sistem akan menambahkan
+      tag 54 (amount) dan tag 63 (CRC) secara otomatis berdasarkan nominal unik.
+    </p>
+  <% } else { %>
+    <p class="text-xs text-slate-300">
+      Belum ada base payload. Simpan QRIS full payload terlebih dahulu.
+    </p>
+  <% } %>
+</div>
+
+<script>
+  $(function() {
+    $("#formQris").on("submit", function(e) {
+      e.preventDefault();
+      $.post("/admin/settings/qris", $(this).serialize(), function(res){
+        if (res.success) {
+          showToast("success", res.message);
+          setTimeout(() => location.reload(), 800);
+        } else {
+          showToast("error", res.message || "Gagal menyimpan payload");
+        }
+      }).fail(() => showToast("error", "Server error"));
+    });
+  });
+</script>
