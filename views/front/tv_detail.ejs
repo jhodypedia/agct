@@ -1,0 +1,110 @@
+<% layout('layouts/main') %>
+
+<% if (ads.top) { %>
+  <div class="mb-3">
+    <div class="ad-slot">
+      <%- ads.top %>
+    </div>
+  </div>
+<% } %>
+
+<div class="grid lg:grid-cols-[3fr,1.1fr] gap-4">
+  <article class="glass-card rounded-xl overflow-hidden">
+    <div class="grid md:grid-cols-[1fr,2fr] gap-0">
+      <div class="relative bg-slate-900">
+        <div class="aspect-[2/3] md:h-full">
+          <% if (tv.poster_path) { %>
+            <img src="https://image.tmdb.org/t/p/w342<%= tv.poster_path %>"
+                 class="w-full h-full object-cover" />
+          <% } else { %>
+            <div class="w-full h-full flex items-center justify-center text-xs text-slate-500">
+              No poster
+            </div>
+          <% } %>
+        </div>
+      </div>
+      <div class="p-4 md:p-5">
+        <h1 class="text-xl font-bold mb-1"><%= tv.name %></h1>
+        <div class="flex flex-wrap items-center gap-2 text-[11px] text-slate-400 mb-2">
+          <span>First Air: <%= tv.first_air_date %></span>
+          <span class="w-[1px] h-3 bg-slate-500"></span>
+          <span>Seasons: <%= tv.number_of_seasons %></span>
+          <span class="w-[1px] h-3 bg-slate-500"></span>
+          <span>Rating: ★ <%= tv.vote_average.toFixed(1) %></span>
+        </div>
+        <p class="text-xs text-slate-200 mb-3">
+          <%= tv.overview %>
+        </p>
+        <div class="text-[11px] text-slate-400 mb-2">
+          Genres:
+          <% tv.genres.forEach((g, idx) => { %>
+            <%= g.name %><%= idx < tv.genres.length - 1 ? ', ' : '' %>
+          <% }) %>
+        </div>
+
+        <% if (tv.videos && tv.videos.results && tv.videos.results.length) { %>
+          <% const trailer = tv.videos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube') || tv.videos.results[0]; %>
+          <% if (trailer) { %>
+            <div class="mt-3">
+              <div class="text-xs font-semibold mb-1">Trailer</div>
+              <div class="aspect-video rounded-lg overflow-hidden bg-black border border-slate-800">
+                <iframe
+                  src="https://www.youtube.com/embed/<%= trailer.key %>"
+                  class="w-full h-full"
+                  frameborder="0"
+                  allowfullscreen
+                ></iframe>
+              </div>
+            </div>
+          <% } %>
+        <% } %>
+      </div>
+    </div>
+  </article>
+
+  <aside class="space-y-4">
+    <% if (ads.sidebar) { %>
+      <div class="glass-card rounded-xl p-3">
+        <div class="ad-slot">
+          <%- ads.sidebar %>
+        </div>
+      </div>
+    <% } %>
+
+    <% if (tv.similar && tv.similar.results && tv.similar.results.length) { %>
+      <section class="glass-card rounded-xl p-3">
+        <h2 class="text-sm font-semibold mb-2">Similar Series</h2>
+        <div class="grid grid-cols-2 gap-2 text-[11px]">
+          <% tv.similar.results.slice(0,8).forEach(s => { %>
+            <a href="/tv/<%= s.id %>" class="flex gap-2">
+              <div class="w-[46px] aspect-[2/3] rounded bg-slate-900 overflow-hidden border border-slate-800">
+                <% if (s.poster_path) { %>
+                  <img src="https://image.tmdb.org/t/p/w185<%= s.poster_path %>"
+                       class="w-full h-full object-cover" />
+                <% } else { %>
+                  <div class="w-full h-full flex items-center justify-center text-[9px] text-slate-500">
+                    No image
+                  </div>
+                <% } %>
+              </div>
+              <div class="flex-1">
+                <div class="font-semibold line-clamp-2"><%= s.name %></div>
+                <div class="text-[10px] text-slate-400">
+                  <%= (s.first_air_date || '').slice(0,4) %> · ★ <%= (s.vote_average || 0).toFixed(1) %>
+                </div>
+              </div>
+            </a>
+          <% }) %>
+        </div>
+      </section>
+    <% } %>
+  </aside>
+</div>
+
+<% if (ads.incontent) { %>
+  <div class="mt-4 glass-card rounded-xl p-3">
+    <div class="ad-slot">
+      <%- ads.incontent %>
+    </div>
+  </div>
+<% } %>
