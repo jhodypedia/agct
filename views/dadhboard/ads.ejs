@@ -1,0 +1,80 @@
+<% layout('layouts/main') %>
+
+<h1 class="text-xl font-semibold mb-3">Ads & Monetization</h1>
+
+<div class="glass-card rounded-xl p-4 mb-4">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+    <div>
+      <div class="text-sm font-semibold mb-1">Site Selection</div>
+      <div class="text-[11px] text-slate-400">
+        Pilih domain yang ingin kamu atur placement iklan.
+      </div>
+    </div>
+    <form method="get" action="/dashboard/ads" class="flex items-center space-x-2 text-xs">
+      <select name="siteId" class="input-base text-xs" onchange="this.form.submit()">
+        <% sites.forEach(s => { %>
+          <option value="<%= s.id %>" <%= site && s.id === site.id ? 'selected' : '' %>>
+            <%= s.domain %>
+          </option>
+        <% }) %>
+      </select>
+    </form>
+  </div>
+
+  <% if (!site) { %>
+    <div class="p-3 text-xs text-slate-300 border border-dashed border-slate-700 rounded-lg">
+      Belum ada site. Buat dulu di halaman Dashboard.
+    </div>
+  <% } else { %>
+    <form id="formAds" class="space-y-3">
+      <input type="hidden" name="siteId" value="<%= site.id %>" />
+
+      <div>
+        <label class="block text-[11px] mb-1">Top / Header Ads</label>
+        <textarea name="top" rows="3"
+          class="input-textarea"><%= ads.top || '' %></textarea>
+        <p class="text-[10px] text-slate-500 mt-1">
+          Script iklan di bagian atas halaman (misal banner Adsterra).
+        </p>
+      </div>
+
+      <div>
+        <label class="block text-[11px] mb-1">In-Content Ads</label>
+        <textarea name="incontent" rows="3"
+          class="input-textarea"><%= ads.incontent || '' %></textarea>
+        <p class="text-[10px] text-slate-500 mt-1">
+          Muncul di tengah list film / dalam artikel.
+        </p>
+      </div>
+
+      <div>
+        <label class="block text-[11px] mb-1">Sidebar / Sticky Ads</label>
+        <textarea name="sidebar" rows="3"
+          class="input-textarea"><%= ads.sidebar || '' %></textarea>
+        <p class="text-[10px] text-slate-500 mt-1">
+          Untuk tampilan desktop (sticky kanan / sidebar).
+        </p>
+      </div>
+
+      <button type="submit"
+        class="mt-2 bg-indigo-500 hover:bg-indigo-600 text-xs font-medium rounded-md py-2 px-4">
+        Save Ads
+      </button>
+    </form>
+  <% } %>
+</div>
+
+<script>
+  $(function() {
+    $("#formAds").on("submit", function(e) {
+      e.preventDefault();
+      $.post("/dashboard/ads/save", $(this).serialize(), function(res) {
+        if (res.success) {
+          showToast("success", res.message);
+        } else {
+          showToast("error", res.message || "Gagal menyimpan");
+        }
+      }).fail(() => showToast("error", "Server error"));
+    });
+  });
+</script>
