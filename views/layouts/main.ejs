@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= typeof title !== 'undefined' ? title + ' · Pansa TMDB SaaS' : 'Pansa TMDB SaaS' %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <% if (seo) { %>
+    <meta name="description" content="<%= seo.description %>" />
+    <meta property="og:title" content="<%= seo.title %>" />
+    <meta property="og:description" content="<%= seo.description %>" />
+    <meta property="og:type" content="<%= seo.type %>" />
+    <meta property="og:url" content="<%= seo.url %>" />
+    <% if (seo.image) { %><meta property="og:image" content="<%= seo.image %>" /><% } %>
+  <% } %>
+
+  <link rel="icon" href="/public/favicon.ico" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="/public/css/app.css" />
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-full flex flex-col">
+  <!-- Top Navbar -->
+  <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur z-40">
+    <div class="max-w-6xl mx-auto px-3 py-3 flex items-center justify-between">
+      <a href="/" class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 via-sky-400 to-teal-300 shadow-glow"></div>
+        <div class="flex flex-col leading-tight">
+          <span class="text-xs uppercase tracking-[0.18em] text-slate-400">PansaGroup</span>
+          <span class="text-sm font-semibold">TMDB Multisite</span>
+        </div>
+      </a>
+
+      <nav class="hidden sm:flex items-center space-x-3 text-xs">
+        <% if (currentUser) { %>
+          <a href="/dashboard" class="nav-link">Dashboard</a>
+          <a href="/dashboard/stats" class="nav-link">Stats</a>
+          <a href="/dashboard/ads" class="nav-link">Ads</a>
+          <a href="/dashboard/billing" class="nav-link">Billing</a>
+          <% if (currentUser.role === 'admin') { %>
+            <a href="/admin" class="nav-link text-amber-300">Admin</a>
+          <% } %>
+          <span class="inline-flex items-center space-x-2 pl-3 border-l border-slate-700 ml-2">
+            <span class="text-[11px] text-slate-400"><%= currentUser.email %></span>
+            <a href="/auth/logout" class="px-2 py-1 rounded bg-slate-800 text-[11px] hover:bg-slate-700">Logout</a>
+          </span>
+        <% } else { %>
+          <a href="/auth/login" class="px-3 py-1 rounded bg-indigo-500 text-[11px] hover:bg-indigo-600">Login</a>
+        <% } %>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 w-full">
+    <div class="max-w-6xl mx-auto px-3 py-4">
+      <%- body %>
+    </div>
+  </main>
+
+  <!-- Mobile bottom nav for dashboard -->
+  <% if (currentUser) { %>
+    <nav class="sm:hidden fixed bottom-0 inset-x-0 bg-slate-950/95 border-t border-slate-800 backdrop-blur z-40">
+      <div class="flex justify-around text-[11px] py-2">
+        <a href="/dashboard" class="bottom-nav-link">
+          <span>🏠</span>
+          <span>Home</span>
+        </a>
+        <a href="/dashboard/stats" class="bottom-nav-link">
+          <span>📊</span>
+          <span>Stats</span>
+        </a>
+        <a href="/dashboard/ads" class="bottom-nav-link">
+          <span>💰</span>
+          <span>Ads</span>
+        </a>
+        <a href="/dashboard/billing" class="bottom-nav-link">
+          <span>💳</span>
+          <span>Billing</span>
+        </a>
+      </div>
+    </nav>
+    <div class="h-14 sm:hidden"></div>
+  <% } %>
+
+  <!-- Global Toast helper -->
+  <script>
+    function showToast(type, message) {
+      const icon = type === 'success' ? 'success'
+          : type === 'error' ? 'error'
+          : type === 'warning' ? 'warning'
+          : 'info';
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: icon,
+        title: message,
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true
+      });
+    }
+  </script>
+</body>
+</html>
