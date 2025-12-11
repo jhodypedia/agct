@@ -1,0 +1,121 @@
+<% layout('layouts/main') %>
+
+<h1 class="text-xl font-semibold mb-3">My Sites</h1>
+
+<div class="grid md:grid-cols-[2fr,1.2fr] gap-4">
+  <!-- List Sites -->
+  <div class="glass-card rounded-xl p-4">
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <div class="text-sm font-semibold">Connected Domains</div>
+        <div class="text-[11px] text-slate-400">
+          Domain yang diarahkan ke server ini & memakai template TMDB.
+        </div>
+      </div>
+      <span class="px-2 py-1 rounded-full bg-slate-900 text-[11px] border border-slate-700">
+        Plan: <span class="font-semibold"><%= currentUser.plan.toUpperCase() %></span>
+      </span>
+    </div>
+
+    <% if (!sites.length) { %>
+      <div class="p-4 text-xs text-slate-300 border border-dashed border-slate-700 rounded-lg">
+        Belum ada site. Tambahkan domain di panel sebelah kanan, lalu arahkan DNS A record ke IP server.
+      </div>
+    <% } else { %>
+      <div class="space-y-3">
+        <% sites.forEach(s => { %>
+          <div class="p-3 rounded-lg border border-slate-800 bg-slate-950/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div class="text-xs">
+              <div class="flex items-center space-x-2">
+                <span class="px-2 py-0.5 rounded-full text-[10px] border border-slate-700">
+                  <%= s.template %>
+                </span>
+                <a href="http://<%= s.domain %>/" target="_blank"
+                   class="font-semibold text-sm hover:text-sky-300">
+                  <%= s.domain %>
+                </a>
+              </div>
+              <div class="text-[11px] text-slate-400 mt-1">
+                <%= s.title || 'No site title yet' %> · <%= s.tagline || 'No tagline' %>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2 text-[11px]">
+              <span class="px-2 py-0.5 rounded-full
+                    <%= s.status === 'active' ? 'bg-emerald-900/40 text-emerald-300' :
+                        s.status === 'pending_dns' ? 'bg-amber-900/40 text-amber-300' :
+                        'bg-slate-900 text-slate-300' %> ">
+                <%= s.status.toUpperCase() %>
+              </span>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Create Site -->
+  <div class="glass-card rounded-xl p-4">
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <div class="text-sm font-semibold">Add New Site</div>
+        <div class="text-[11px] text-slate-400">
+          Tersedia untuk plan PRO. Domain harus sudah aktif & diarahkan ke IP server.
+        </div>
+      </div>
+    </div>
+
+    <% if (currentUser.plan !== 'pro') { %>
+      <div class="p-3 rounded-lg border border-amber-700 bg-amber-900/30 text-xs text-amber-100">
+        Upgrade ke PRO di menu <a href="/dashboard/billing" class="underline">Billing</a> untuk bisa menambah domain.
+      </div>
+    <% } else { %>
+      <form id="formCreateSite" class="space-y-3">
+        <div>
+          <label class="block text-[11px] mb-1">Domain</label>
+          <input type="text" name="domain" required placeholder="contoh: cinema.pansa.my.id"
+                 class="input-base" />
+        </div>
+        <div>
+          <label class="block text-[11px] mb-1">Template</label>
+          <select name="template" class="input-base text-xs">
+            <option value="stream_classic">Streaming Classic</option>
+            <option value="cinema_hero">Cinema Hero</option>
+            <option value="blog_magazine">Blog Magazine</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] mb-1">Site Title</label>
+          <input type="text" name="title" placeholder="My Cinema Universe" class="input-base" />
+        </div>
+        <div>
+          <label class="block text-[11px] mb-1">Tagline</label>
+          <input type="text" name="tagline" placeholder="Best streaming for K-Drama, C-drama, Anime" class="input-base" />
+        </div>
+        <button type="submit"
+          class="w-full mt-1 bg-indigo-500 hover:bg-indigo-600 text-xs font-medium rounded-md py-2">
+          Create Site
+        </button>
+      </form>
+      <p class="mt-3 text-[10px] text-slate-500">
+        Setelah dibuat, arahkan DNS domain ke IP server (A record). Status akan menjadi <b>ACTIVE</b> ketika
+        admin meng-approve domain dan DNS sudah benar.
+      </p>
+    <% } %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $("#formCreateSite").on("submit", function (e) {
+      e.preventDefault();
+      $.post("/dashboard/sites", $(this).serialize(), function (res) {
+        if (res.success) {
+          showToast("success", res.message);
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          showToast("error", res.message || "Failed");
+        }
+      }).fail(() => showToast("error", "Server error"));
+    });
+  });
+</script>
