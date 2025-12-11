@@ -1,0 +1,154 @@
+<% layout('layouts/main') %>
+
+<% const hero = trending.results[0]; %>
+
+<% if (ads.top) { %>
+  <div class="mb-3">
+    <div class="ad-slot">
+      <%- ads.top %>
+    </div>
+  </div>
+<% } %>
+
+<section class="glass-card rounded-2xl overflow-hidden mb-4">
+  <div class="relative h-[260px] sm:h-[320px] md:h-[380px]">
+    <% if (hero && hero.backdrop_path) { %>
+      <img src="https://image.tmdb.org/t/p/w780<%= hero.backdrop_path %>"
+           class="absolute inset-0 w-full h-full object-cover" />
+    <% } else { %>
+      <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"></div>
+    <% } %>
+    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/10"></div>
+
+    <div class="relative z-10 h-full flex flex-col md:flex-row items-end md:items-center">
+      <div class="flex-1 px-4 sm:px-6 py-4 md:py-6">
+        <div class="text-[11px] uppercase tracking-[0.18em] text-slate-300 mb-2">
+          Featured Today
+        </div>
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold mb-2">
+          <%= hero ? (hero.title || hero.name) : (site.title || 'Cinema Hero') %>
+        </h1>
+        <% if (hero) { %>
+          <div class="flex flex-wrap items-center gap-2 text-[11px] text-slate-200 mb-2">
+            <span>★ <%= (hero.vote_average || 0).toFixed(1) %></span>
+            <span class="w-[1px] h-3 bg-slate-500"></span>
+            <span><%= (hero.release_date || hero.first_air_date || '').slice(0,4) %></span>
+            <span class="w-[1px] h-3 bg-slate-500"></span>
+            <span><%= (hero.media_type || (hero.title ? 'movie':'tv')).toUpperCase() %></span>
+          </div>
+          <p class="text-xs text-slate-200/90 line-clamp-3 max-w-xl mb-3">
+            <%= hero.overview %>
+          </p>
+          <a href="<%= hero.title ? '/movie/' + hero.id : '/tv/' + hero.id %>"
+             class="inline-flex items-center px-3 py-1.5 rounded-full bg-indigo-500 text-xs hover:bg-indigo-600">
+            ▶ Watch Detail
+          </a>
+        <% } else { %>
+          <p class="text-xs text-slate-300 max-w-xl">
+            <%= site.tagline || 'Auto streaming website powered by TMDB.' %>
+          </p>
+        <% } %>
+      </div>
+      <% if (hero && hero.poster_path) { %>
+        <div class="hidden sm:block w-[160px] md:w-[190px] mr-5 mb-4 md:mb-0">
+          <div class="rounded-xl overflow-hidden border-4 border-slate-900 shadow-strong aspect-[2/3]">
+            <img src="https://image.tmdb.org/t/p/w342<%= hero.poster_path %>"
+                 class="w-full h-full object-cover" />
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<div class="grid lg:grid-cols-[3fr,1.1fr] gap-4">
+  <div class="space-y-4">
+    <!-- Trending grid -->
+    <section class="glass-card rounded-xl p-3">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-sm font-semibold">Trending Today</h2>
+      </div>
+      <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+        <% trending.results.slice(0,15).forEach(item => { %>
+          <% const isMovie = !!item.title; %>
+          <a href="<%= isMovie ? '/movie/' + item.id : '/tv/' + item.id %>"
+             class="group text-[11px]">
+            <div class="rounded-md overflow-hidden border border-slate-800 bg-slate-900/80 aspect-[2/3] mb-1">
+              <% if (item.poster_path) { %>
+                <img src="https://image.tmdb.org/t/p/w185<%= item.poster_path %>"
+                     class="w-full h-full object-cover group-hover:scale-105 transition" />
+              <% } else { %>
+                <div class="w-full h-full flex items-center justify-center text-[10px] text-slate-500">
+                  No image
+                </div>
+              <% } %>
+            </div>
+            <div class="truncate font-medium"><%= item.title || item.name %></div>
+            <div class="text-[10px] text-slate-400">
+              ★ <%= (item.vote_average || 0).toFixed(1) %>
+            </div>
+          </a>
+        <% }) %>
+      </div>
+    </section>
+
+    <!-- Top Rated -->
+    <section class="glass-card rounded-xl p-3">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-sm font-semibold">Top Rated Movies</h2>
+      </div>
+      <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+        <% topRated.results.slice(0,15).forEach(m => { %>
+          <a href="/movie/<%= m.id %>"
+             class="group text-[11px]">
+            <div class="rounded-md overflow-hidden border border-slate-800 bg-slate-900/80 aspect-[2/3] mb-1">
+              <% if (m.poster_path) { %>
+                <img src="https://image.tmdb.org/t/p/w185<%= m.poster_path %>"
+                     class="w-full h-full object-cover group-hover:scale-105 transition" />
+              <% } else { %>
+                <div class="w-full h-full flex items-center justify-center text-[10px] text-slate-500">
+                  No image
+                </div>
+              <% } %>
+            </div>
+            <div class="truncate font-medium"><%= m.title %></div>
+            <div class="text-[10px] text-slate-400">
+              <%= (m.release_date || '').slice(0,4) %> · ★ <%= (m.vote_average || 0).toFixed(1) %>
+            </div>
+          </a>
+        <% }) %>
+      </div>
+    </section>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="space-y-4">
+    <% if (ads.sidebar) { %>
+      <div class="glass-card rounded-xl p-3">
+        <div class="ad-slot">
+          <%- ads.sidebar %>
+        </div>
+      </div>
+    <% } %>
+
+    <section class="glass-card rounded-xl p-3">
+      <h2 class="text-sm font-semibold mb-2">Genres</h2>
+      <div class="flex flex-wrap gap-1">
+        <% genres.genres.forEach(g => { %>
+          <a href="/discover?genre=<%= g.id %>"
+             class="px-2 py-1 rounded-full bg-slate-900 text-[11px] border border-slate-700 hover:border-fuchsia-300">
+            <%= g.name %>
+          </a>
+        <% }) %>
+      </div>
+    </section>
+  </aside>
+</div>
+
+<% if (ads.incontent) { %>
+  <div class="mt-4 glass-card rounded-xl p-3">
+    <div class="ad-slot">
+      <%- ads.incontent %>
+    </div>
+  </div>
+<% } %>
