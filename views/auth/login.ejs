@@ -1,0 +1,38 @@
+<% layout('layouts/main') %>
+
+<div class="min-h-[70vh] flex items-center justify-center">
+  <div class="glass-card max-w-md w-full rounded-2xl p-5">
+    <h1 class="text-lg font-semibold mb-1">Login</h1>
+    <p class="text-xs text-slate-400 mb-4">
+      Masuk untuk mengelola domain TMDB streaming/blog kamu.
+    </p>
+
+    <% if (error) { %>
+      <div class="mb-3 px-3 py-2 text-xs rounded bg-rose-900/40 text-rose-200 border border-rose-700/60">
+        <%= error %>
+      </div>
+    <% } %>
+
+    <form method="post" action="/auth/login" class="space-y-3">
+      <div>
+        <label class="block text-[11px] mb-1">Email</label>
+        <input type="email" name="email" required
+          class="w-full rounded-md bg-slate-900 border border-slate-700 px-3 py-2 text-xs focus:outline-none focus:border-indigo-400" />
+      </div>
+      <div>
+        <label class="block text-[11px] mb-1">Password</label>
+        <input type="password" name="password" required
+          class="w-full rounded-md bg-slate-900 border border-slate-700 px-3 py-2 text-xs focus:outline-none focus:border-indigo-400" />
+      </div>
+
+      <button type="submit"
+        class="w-full mt-1 bg-indigo-500 hover:bg-indigo-600 text-xs font-medium rounded-md py-2">
+        Login
+      </button>
+    </form>
+
+    <p class="mt-4 text-[11px] text-slate-500">
+      Akun dibuat manual oleh admin. Hubungi admin PansaGroup jika belum punya akses.
+    </p>
+  </div>
+</div>
