@@ -1,0 +1,35 @@
+<% layout('layouts/admin') %>
+
+<h1 class="text-xl font-semibold mb-3">TMDB API Settings</h1>
+
+<div class="glass-card rounded-xl p-4">
+  <form id="formTmdb" class="space-y-3">
+    <div>
+      <label class="block text-[11px] mb-1">TMDB API Key</label>
+      <input type="text" name="tmdbKey" value="<%= tmdbKey || '' %>"
+             class="input-base text-xs" placeholder="TMDB API Key..." />
+      <p class="text-[10px] text-slate-500 mt-1">
+        Key ini digunakan untuk mengambil data film/TV dari TMDB di semua domain.
+      </p>
+    </div>
+    <button type="submit"
+      class="mt-1 px-4 py-2 text-xs rounded bg-indigo-500 hover:bg-indigo-600">
+      Save
+    </button>
+  </form>
+</div>
+
+<script>
+  $(function() {
+    $("#formTmdb").on("submit", function(e) {
+      e.preventDefault();
+      $.post("/admin/settings/tmdb", $(this).serialize(), function(res) {
+        if (res.success) {
+          showToast("success", res.message);
+        } else {
+          showToast("error", res.message || "Gagal menyimpan");
+        }
+      }).fail(() => showToast("error", "Server error"));
+    });
+  });
+</script>
