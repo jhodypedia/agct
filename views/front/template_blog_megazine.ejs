@@ -1,0 +1,158 @@
+<% layout('layouts/main') %>
+
+<% if (ads.top) { %>
+  <div class="mb-3">
+    <div class="ad-slot">
+      <%- ads.top %>
+    </div>
+  </div>
+<% } %>
+
+<div class="grid lg:grid-cols-[2.3fr,1.1fr] gap-4">
+  <div class="space-y-4">
+    <!-- Headline article style -->
+    <% const headline = trending.results[0]; %>
+    <% if (headline) { %>
+      <article class="glass-card rounded-xl overflow-hidden">
+        <div class="grid md:grid-cols-2 gap-0">
+          <div class="relative h-[220px] md:h-full">
+            <% if (headline.backdrop_path || headline.poster_path) { %>
+              <img src="https://image.tmdb.org/t/p/w780<%= headline.backdrop_path || headline.poster_path %>"
+                   class="w-full h-full object-cover" />
+            <% } else { %>
+              <div class="w-full h-full bg-slate-900"></div>
+            <% } %>
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+          </div>
+          <div class="p-4 flex flex-col">
+            <div class="text-[10px] uppercase tracking-[0.16em] text-emerald-300 mb-1">
+              Featured · <%= (headline.media_type || (headline.title ? 'movie':'tv')).toUpperCase() %>
+            </div>
+            <h1 class="text-lg font-bold mb-2 leading-snug">
+              <%= headline.title || headline.name %>
+            </h1>
+            <p class="text-xs text-slate-300 line-clamp-4 mb-3">
+              <%= headline.overview %>
+            </p>
+            <div class="mt-auto flex items-center justify-between text-[11px] text-slate-400">
+              <span>★ <%= (headline.vote_average || 0).toFixed(1) %></span>
+              <span><%= (headline.release_date || headline.first_air_date || '').slice(0,4) %></span>
+              <a href="<%= headline.title ? '/movie/' + headline.id : '/tv/' + headline.id %>"
+                 class="px-3 py-1 rounded-full bg-slate-900 hover:bg-slate-800 text-[11px]">
+                Read More
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+    <% } %>
+
+    <!-- Recent block (mix movies/series) -->
+    <section class="glass-card rounded-xl p-4">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-sm font-semibold">Fresh Picks</h2>
+        <a href="/discover" class="text-[11px] text-sky-300 hover:text-sky-200">View all</a>
+      </div>
+      <div class="space-y-3">
+        <% trending.results.slice(1,7).forEach(item => { %>
+          <% const isMovie = !!item.title; %>
+          <article class="flex gap-3 border-b border-slate-800/80 pb-3 last:border-0 last:pb-0">
+            <a href="<%= isMovie ? '/movie/' + item.id : '/tv/' + item.id %>"
+               class="w-[72px] flex-shrink-0 rounded-md overflow-hidden bg-slate-900 border border-slate-800">
+              <% if (item.poster_path) { %>
+                <img src="https://image.tmdb.org/t/p/w185<%= item.poster_path %>"
+                     class="w-full h-full object-cover" />
+              <% } else { %>
+                <div class="w-full h-full flex items-center justify-center text-[10px] text-slate-500">
+                  No image
+                </div>
+              <% } %>
+            </a>
+            <div class="flex-1 text-[11px]">
+              <a href="<%= isMovie ? '/movie/' + item.id : '/tv/' + item.id %>"
+                 class="font-semibold text-slate-100 hover:text-sky-300">
+                <%= item.title || item.name %>
+              </a>
+              <div class="text-slate-400 mt-0.5">
+                <%= (item.release_date || item.first_air_date || '').slice(0,4) %> ·
+                <%= (item.media_type || (item.title ? 'movie':'tv')).toUpperCase() %> ·
+                ★ <%= (item.vote_average || 0).toFixed(1) %>
+              </div>
+              <p class="mt-1 text-slate-400 line-clamp-2">
+                <%= item.overview %>
+              </p>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    </section>
+
+    <% if (ads.incontent) { %>
+      <div class="glass-card rounded-xl p-3">
+        <div class="ad-slot">
+          <%- ads.incontent %>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Another grid of popular movies -->
+    <section class="glass-card rounded-xl p-4">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-sm font-semibold">Popular Movies</h2>
+      </div>
+      <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+        <% popularMovies.results.slice(0,10).forEach(m => { %>
+          <a href="/movie/<%= m.id %>" class="group text-[11px]">
+            <div class="rounded-md overflow-hidden bg-slate-900 border border-slate-800 aspect-[2/3] mb-1">
+              <% if (m.poster_path) { %>
+                <img src="https://image.tmdb.org/t/p/w185<%= m.poster_path %>"
+                     class="w-full h-full object-cover group-hover:scale-105 transition" />
+              <% } else { %>
+                <div class="w-full h-full flex items-center justify-center text-[10px] text-slate-500">
+                  No image
+                </div>
+              <% } %>
+            </div>
+            <div class="truncate font-medium"><%= m.title %></div>
+            <div class="text-[10px] text-slate-400">
+              <%= (m.release_date || '').slice(0,4) %>
+            </div>
+          </a>
+        <% }) %>
+      </div>
+    </section>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="space-y-4">
+    <% if (ads.sidebar) { %>
+      <div class="glass-card rounded-xl p-3">
+        <div class="ad-slot">
+          <%- ads.sidebar %>
+        </div>
+      </div>
+    <% } %>
+
+    <section class="glass-card rounded-xl p-3 text-[11px]">
+      <h2 class="text-sm font-semibold mb-2">About This Site</h2>
+      <p class="text-slate-400 mb-2">
+        <%= site.tagline || 'Automated TMDB-based magazine layout for movie & series discovery.' %>
+      </p>
+      <p class="text-slate-500">
+        Powered by <span class="font-semibold text-sky-300">PansaGroup Multisite</span>.
+      </p>
+    </section>
+
+    <section class="glass-card rounded-xl p-3">
+      <h2 class="text-sm font-semibold mb-2">Genres</h2>
+      <div class="flex flex-wrap gap-1">
+        <% genres.genres.forEach(g => { %>
+          <a href="/discover?genre=<%= g.id %>"
+             class="px-2 py-1 rounded-full bg-slate-900 text-[11px] border border-slate-700 hover:border-emerald-300">
+            <%= g.name %>
+          </a>
+        <% }) %>
+      </div>
+    </section>
+  </aside>
+</div>
