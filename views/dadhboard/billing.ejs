@@ -1,0 +1,167 @@
+<% layout('layouts/main') %>
+
+<h1 class="text-xl font-semibold mb-4">Billing & Subscription</h1>
+
+<div class="glass-card rounded-xl p-4 mb-4">
+  <div class="flex items-center justify-between mb-2">
+    <div>
+      <div class="text-sm font-semibold">Your Plan</div>
+      <div class="text-xs text-slate-300">
+        <%= user.plan.toUpperCase() %> · Billing: <%= user.billing_status %>
+      </div>
+    </div>
+    <a href="/dashboard/invoices"
+       class="text-[11px] px-3 py-1 rounded border border-slate-700 hover:bg-slate-800">
+      View Invoices
+    </a>
+  </div>
+
+  <% if (user.plan === 'pro') { %>
+    <p class="text-xs text-emerald-300 mt-2">
+      You are on PRO plan. All features (multi domain, ads, analytics) are unlocked.
+    </p>
+
+    <% if (lastInvoice) { %>
+      <p class="text-[11px] text-slate-400 mt-2">
+        Last invoice: <span class="font-semibold"><%= lastInvoice.plan_name %></span>
+        · Rp <%= lastInvoice.final_amount %>
+        · status: <%= lastInvoice.status %>
+      </p>
+    <% } %>
+  <% } else { %>
+    <p class="text-xs text-slate-300 mb-4">
+      Pilih paket di bawah, sistem akan generate <span class="font-semibold">QRIS dinamis</span>
+      dengan nominal unik (misal Rp 15.123) dan simpan invoice di sistem.
+    </p>
+
+    <div class="grid sm:grid-cols-3 gap-3 mb-4">
+      <!-- Paket 15k -->
+      <div class="glass-card rounded-xl p-3 flex flex-col justify-between">
+        <div>
+          <div class="text-sm font-semibold mb-1">Starter</div>
+          <div class="text-lg font-bold mb-1">Rp 15.000</div>
+          <div class="text-[11px] text-slate-400">
+            1 domain · basic ads · analytics standard.
+          </div>
+        </div>
+        <button
+          class="btnChoosePlan mt-3 px-3 py-2 text-xs rounded bg-indigo-500 hover:bg-indigo-600 w-full"
+          data-amount="15000"
+          data-plan="starter">
+          Pilih paket 15k
+        </button>
+      </div>
+
+      <!-- Paket 30k -->
+      <div class="glass-card rounded-xl p-3 flex flex-col justify-between">
+        <div>
+          <div class="text-sm font-semibold mb-1">Pro</div>
+          <div class="text-lg font-bold mb-1">Rp 30.000</div>
+          <div class="text-[11px] text-slate-400">
+            3 domain · full ads slot · analytics+.
+          </div>
+        </div>
+        <button
+          class="btnChoosePlan mt-3 px-3 py-2 text-xs rounded bg-indigo-500 hover:bg-indigo-600 w-full"
+          data-amount="30000"
+          data-plan="pro">
+          Pilih paket 30k
+        </button>
+      </div>
+
+      <!-- Paket 50k -->
+      <div class="glass-card rounded-xl p-3 flex flex-col justify-between">
+        <div>
+          <div class="text-sm font-semibold mb-1">Agency</div>
+          <div class="text-lg font-bold mb-1">Rp 50.000</div>
+          <div class="text-[11px] text-slate-400">
+            10 domain · full control · support prioritas.
+          </div>
+        </div>
+        <button
+          class="btnChoosePlan mt-3 px-3 py-2 text-xs rounded bg-indigo-500 hover:bg-indigo-600 w-full"
+          data-amount="50000"
+          data-plan="agency">
+          Pilih paket 50k
+        </button>
+      </div>
+    </div>
+
+    <% if (!qrisBase) { %>
+      <p class="text-xs text-rose-300 mt-2">
+        QRIS base payload belum dikonfigurasi oleh admin. Silakan hubungi admin.
+      </p>
+    <% } else { %>
+      <p class="text-[10px] text-slate-500">
+        QRIS sudah dikonfigurasi oleh admin. Sistem akan membuat nominal unik dan CRC baru untuk setiap invoice.
+      </p>
+    <% } %>
+  <% } %>
+</div>
+
+<script>
+  function formatRupiah(num) {
+    return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(num);
+  }
+
+  $(function() {
+    $(".btnChoosePlan").on("click", function() {
+      const amount = $(this).data("amount");
+      const plan = $(this).data("plan");
+
+      $.post("/dashboard/billing/generate", { baseAmount: amount, planName: plan }, function(res) {
+        if (!res.success) {
+          showToast("error", res.message || "Gagal generate QR");
+          return;
+        }
+
+        const prettyAmount = formatRupiah(res.amount);
+
+        Swal.fire({
+          icon: "info",
+          title: "QRIS untuk " + prettyAmount,
+          html: `
+            <div class="text-left text-xs">
+              <div class="flex justify-center my-3">
+                <img src="${res.qrDataUrl}" alt="QRIS"
+                     class="w-40 h-40 border border-slate-700 rounded bg-white p-1" />
+              </div>
+              <div class="mb-2">
+                <span class="font-semibold">Nominal unik:</span> ${prettyAmount}<br>
+                <span class="text-[10px] text-slate-400">(kode unik: ${res.uniqueCode})</span>
+              </div>
+              <div class="mb-2">
+                <span class="font-semibold">Payload QRIS (dengan CRC):</span>
+              </div>
+              <div class="p-2 bg-slate-900 border border-slate-800 rounded text-[11px]" style="text-align:left;">
+                ${res.payload}
+              </div>
+              <p class="mt-2 text-[10px] text-slate-400">
+                Scan QR di atas menggunakan aplikasi pembayaran yang mendukung QRIS.
+              </p>
+            </div>
+          `,
+          confirmButtonText: "Sudah bayar",
+          showCancelButton: true,
+          cancelButtonText: "Tutup",
+          customClass: {
+            popup: "bg-slate-950 text-slate-100"
+          }
+        }).then((r) => {
+          if (!r.isConfirmed) return;
+
+          $.post("/dashboard/billing/confirm", { invoiceId: res.invoiceId }, function(res2) {
+            if (res2.success) {
+              showToast("success", res2.message);
+              setTimeout(() => location.reload(), 1000);
+            } else {
+              showToast("error", res2.message || "Gagal konfirmasi pembayaran");
+            }
+          }).fail(() => showToast("error", "Server error"));
+        });
+      }).fail(function() {
+        showToast("error", "Server error");
+      });
+    });
+  });
+</script>
