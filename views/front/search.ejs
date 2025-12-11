@@ -1,0 +1,53 @@
+<% layout('layouts/main') %>
+
+<h1 class="text-xl font-semibold mb-3">Search</h1>
+
+<form method="get" action="/search" class="mb-4 flex gap-2">
+  <input type="text" name="q" value="<%= query %>"
+         placeholder="Search movies, series, people..."
+         class="flex-1 input-base text-xs" />
+  <button class="px-3 py-2 rounded bg-indigo-500 hover:bg-indigo-600 text-xs">
+    Search
+  </button>
+</form>
+
+<% if (!query) { %>
+  <div class="glass-card rounded-xl p-4 text-xs text-slate-400">
+    Ketik judul film / series untuk memulai pencarian.
+  </div>
+<% } else if (!results || !results.results || !results.results.length) { %>
+  <div class="glass-card rounded-xl p-4 text-xs text-slate-400">
+    Tidak ada hasil untuk "<%= query %>".
+  </div>
+<% } else { %>
+  <div class="glass-card rounded-xl p-4">
+    <div class="text-xs text-slate-400 mb-2">
+      Hasil: <%= results.results.length %> item
+    </div>
+    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+      <% results.results.forEach(r => { %>
+        <% if (!r.media_type) return; %>
+        <% const isMovie = r.media_type === 'movie'; %>
+        <% const isTV = r.media_type === 'tv'; %>
+        <% if (!isMovie && !isTV) return; %>
+        <a href="<%= isMovie ? '/movie/' + r.id : '/tv/' + r.id %>"
+           class="group text-[11px]">
+          <div class="rounded-md overflow-hidden bg-slate-900 border border-slate-800 aspect-[2/3] mb-1">
+            <% if (r.poster_path) { %>
+              <img src="https://image.tmdb.org/t/p/w185<%= r.poster_path %>"
+                   class="w-full h-full object-cover group-hover:scale-105 transition" />
+            <% } else { %>
+              <div class="w-full h-full flex items-center justify-center text-[10px] text-slate-500">
+                No image
+              </div>
+            <% } %>
+          </div>
+          <div class="truncate font-medium"><%= r.title || r.name %></div>
+          <div class="text-[10px] text-slate-400">
+            <%= (r.release_date || r.first_air_date || '').slice(0,4) %> · <%= r.media_type.toUpperCase() %>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  </div>
+<% } %>
