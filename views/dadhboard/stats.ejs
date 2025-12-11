@@ -1,0 +1,118 @@
+<% layout('layouts/main') %>
+
+<h1 class="text-xl font-semibold mb-3">Analytics & Traffic</h1>
+
+<div class="grid md:grid-cols-[2fr,1.2fr] gap-4">
+  <div class="glass-card rounded-xl p-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+      <div>
+        <div class="text-sm font-semibold mb-1">Traffic Overview</div>
+        <div class="text-[11px] text-slate-400">
+          Laporan pengunjung per hari berdasarkan hostname & path.
+        </div>
+      </div>
+      <% if (sites && sites.length) { %>
+        <form method="get" action="/dashboard/stats"
+          class="flex flex-wrap items-center gap-2 text-[11px]">
+          <select name="siteId" class="input-base text-xs">
+            <% sites.forEach(s => { %>
+              <option value="<%= s.id %>" <%= site && s.id === site.id ? 'selected' : '' %>>
+                <%= s.domain %>
+              </option>
+            <% }) %>
+          </select>
+          <input type="date" name="start" value="<%= startDateStr %>" class="input-base text-xs w-[130px]" />
+          <input type="date" name="end" value="<%= endDateStr %>" class="input-base text-xs w-[130px]" />
+          <button type="submit"
+            class="px-3 py-1 rounded bg-slate-800 hover:bg-slate-700">Filter</button>
+        </form>
+      <% } %>
+    </div>
+
+    <% if (!site) { %>
+      <div class="p-3 text-xs text-slate-300 border border-dashed border-slate-700 rounded-lg">
+        Belum ada site. Buat dulu di halaman Dashboard.
+      </div>
+    <% } else if (!chartData) { %>
+      <div class="p-3 text-xs text-slate-300 border border-dashed border-slate-700 rounded-lg">
+        Belum ada data kunjungan.
+      </div>
+    <% } else { %>
+      <div class="mb-4">
+        <canvas id="trafficChart" height="160"></canvas>
+      </div>
+      <div class="grid grid-cols-3 gap-3 text-[11px]">
+        <div class="stat-card">
+          <div class="text-slate-400">Total Views</div>
+          <div class="text-lg font-semibold"><%= stats.totalViews %></div>
+        </div>
+        <div class="stat-card">
+          <div class="text-slate-400">Today</div>
+          <div class="text-lg font-semibold"><%= stats.todayViews %></div>
+        </div>
+        <div class="stat-card">
+          <div class="text-slate-400">Last 7 days</div>
+          <div class="text-lg font-semibold"><%= stats.sevenDaysViews %></div>
+        </div>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="glass-card rounded-xl p-4">
+    <div class="text-sm font-semibold mb-2">Top Paths</div>
+    <% if (!topPaths || !topPaths.length) { %>
+      <div class="p-3 text-xs text-slate-400 border border-dashed border-slate-700 rounded-lg">
+        Belum ada data path untuk range tanggal ini.
+      </div>
+    <% } else { %>
+      <div class="space-y-2 text-[11px]">
+        <% topPaths.forEach(p => { %>
+          <div class="flex items-center justify-between p-2 rounded bg-slate-900/60 border border-slate-800">
+            <div class="truncate max-w-[70%]"><%= p.path %></div>
+            <div class="font-semibold"><%= p.get("views") %></div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<% if (chartData) { %>
+<script>
+  $(function(){
+    const ctx = document.getElementById("trafficChart").getContext("2d");
+    const chart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: <%- JSON.stringify(chartData.labels) %>,
+        datasets: [{
+          label: "Pageviews",
+          data: <%- JSON.stringify(chartData.values) %>,
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            labels: {
+              color: "#cbd5f5",
+              font: { size: 10 }
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: "#94a3b8", maxRotation: 0 },
+            grid: { color: "rgba(148,163,184,0.15)" }
+          },
+          y: {
+            ticks: { color: "#94a3b8" },
+            grid: { color: "rgba(148,163,184,0.15)" }
+          }
+        }
+      }
+    });
+  });
+</script>
+<% } %>
