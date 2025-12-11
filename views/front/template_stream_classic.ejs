@@ -1,0 +1,152 @@
+<% layout('layouts/main') %>
+
+<!-- Top Ads -->
+<% if (ads.top) { %>
+  <div class="mb-3">
+    <div class="ad-slot" style="min-height:80px;">
+      <%- ads.top %>
+    </div>
+  </div>
+<% } %>
+
+<div class="grid lg:grid-cols-[3fr,1.1fr] gap-4">
+  <div class="space-y-4">
+    <!-- Hero: Trending -->
+    <section class="glass-card rounded-xl overflow-hidden">
+      <div class="p-3 border-b border-slate-800 flex items-center justify-between">
+        <h1 class="text-sm font-semibold">
+          <%= site.title || 'TMDB Streaming' %>
+        </h1>
+        <span class="text-[11px] text-slate-400">
+          Trending Now
+        </span>
+      </div>
+      <div class="p-3 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <% trending.results.slice(0,9).forEach(item => { %>
+          <% const isMovie = !!item.title; %>
+          <a href="<%= isMovie ? '/movie/' + item.id : '/tv/' + item.id %>"
+             class="group rounded-lg overflow-hidden bg-slate-900/70 border border-slate-800 hover:border-indigo-500/60 hover:-translate-y-0.5 transition">
+            <div class="relative aspect-[2/3] overflow-hidden">
+              <% if (item.poster_path) { %>
+                <img src="https://image.tmdb.org/t/p/w342<%= item.poster_path %>"
+                     alt="<%= item.title || item.name %>"
+                     class="w-full h-full object-cover group-hover:scale-105 transition" />
+              <% } else { %>
+                <div class="w-full h-full flex items-center justify-center text-[11px] text-slate-500">
+                  No image
+                </div>
+              <% } %>
+              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                <div class="text-[11px] font-semibold truncate">
+                  <%= item.title || item.name %>
+                </div>
+                <div class="text-[10px] text-slate-300 flex items-center justify-between">
+                  <span><%= (item.media_type || (item.title ? 'movie':'tv')).toUpperCase() %></span>
+                  <span>★ <%= (item.vote_average || 0).toFixed(1) %></span>
+                </div>
+              </div>
+            </div>
+          </a>
+        <% }) %>
+      </div>
+    </section>
+
+    <!-- Popular Movies -->
+    <section class="glass-card rounded-xl p-3">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-sm font-semibold">Popular Movies</h2>
+        <a href="/discover" class="text-[11px] text-sky-300 hover:text-sky-200">Discover</a>
+      </div>
+      <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+        <% popularMovies.results.slice(0,15).forEach(m => { %>
+          <a href="/movie/<%= m.id %>"
+             class="group text-[11px]">
+            <div class="rounded-md overflow-hidden border border-slate-800 bg-slate-900/80 aspect-[2/3] mb-1">
+              <% if (m.poster_path) { %>
+                <img src="https://image.tmdb.org/t/p/w185<%= m.poster_path %>"
+                     alt="<%= m.title %>"
+                     class="w-full h-full object-cover group-hover:scale-105 transition" />
+              <% } else { %>
+                <div class="w-full h-full flex items-center justify-center text-[10px] text-slate-500">
+                  No image
+                </div>
+              <% } %>
+            </div>
+            <div class="truncate font-medium"><%= m.title %></div>
+            <div class="text-[10px] text-slate-400">
+              <%= (m.release_date || '').slice(0,4) %> · ★ <%= (m.vote_average || 0).toFixed(1) %>
+            </div>
+          </a>
+        <% }) %>
+      </div>
+    </section>
+
+    <!-- Popular TV -->
+    <section class="glass-card rounded-xl p-3">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-sm font-semibold">Popular Series</h2>
+      </div>
+      <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+        <% popularTv.results.slice(0,15).forEach(t => { %>
+          <a href="/tv/<%= t.id %>"
+             class="group text-[11px]">
+            <div class="rounded-md overflow-hidden border border-slate-800 bg-slate-900/80 aspect-[2/3] mb-1">
+              <% if (t.poster_path) { %>
+                <img src="https://image.tmdb.org/t/p/w185<%= t.poster_path %>"
+                     alt="<%= t.name %>"
+                     class="w-full h-full object-cover group-hover:scale-105 transition" />
+              <% } else { %>
+                <div class="w-full h-full flex items-center justify-center text-[10px] text-slate-500">
+                  No image
+                </div>
+              <% } %>
+            </div>
+            <div class="truncate font-medium"><%= t.name %></div>
+            <div class="text-[10px] text-slate-400">
+              <%= (t.first_air_date || '').slice(0,4) %> · ★ <%= (t.vote_average || 0).toFixed(1) %>
+            </div>
+          </a>
+        <% }) %>
+      </div>
+    </section>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="space-y-4">
+    <% if (ads.sidebar) { %>
+      <div class="glass-card rounded-xl p-3">
+        <div class="ad-slot">
+          <%- ads.sidebar %>
+        </div>
+      </div>
+    <% } %>
+
+    <section class="glass-card rounded-xl p-3">
+      <h2 class="text-sm font-semibold mb-2">Genres</h2>
+      <div class="flex flex-wrap gap-1">
+        <% genres.genres.forEach(g => { %>
+          <a href="/discover?genre=<%= g.id %>"
+             class="px-2 py-1 rounded-full bg-slate-900 text-[11px] border border-slate-700 hover:border-sky-300">
+            <%= g.name %>
+          </a>
+        <% }) %>
+      </div>
+    </section>
+
+    <section class="glass-card rounded-xl p-3 text-[11px]">
+      <h2 class="text-sm font-semibold mb-2">About</h2>
+      <p class="text-slate-400">
+        <%= site.tagline || 'Auto-Generated TMDB streaming template by PansaGroup.' %>
+      </p>
+    </section>
+  </aside>
+</div>
+
+<!-- In-content ads hook -->
+<% if (ads.incontent) { %>
+  <div class="mt-4 glass-card rounded-xl p-3">
+    <div class="ad-slot">
+      <%- ads.incontent %>
+    </div>
+  </div>
+<% } %>
