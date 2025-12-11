@@ -1,0 +1,22 @@
+<% layout('layouts/admin') %>
+
+<h1 class="text-xl font-semibold mb-3">Admin Overview</h1>
+
+<div class="grid md:grid-cols-3 gap-3">
+  <div class="admin-stat">
+    <div class="text-[11px] text-slate-400 mb-1">Total Users</div>
+    <div class="text-2xl font-semibold"><%= usersCount %></div>
+  </div>
+  <div class="admin-stat">
+    <div class="text-[11px] text-slate-400 mb-1">Total Sites</div>
+    <div class="text-2xl font-semibold"><%= sitesCount %></div>
+  </div>
+  <div class="admin-stat">
+    <div class="text-[11px] text-slate-400 mb-1">Active Sites</div>
+    <div class="text-2xl font-semibold"><%= activeSitesCount %></div>
+  </div>
+</div>
+
+<p class="mt-4 text-[11px] text-slate-500">
+  Gunakan menu di sidebar untuk mengelola domain, TMDB API, dan QRIS billing.
+</p>
